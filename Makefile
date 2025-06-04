@@ -59,6 +59,23 @@ verify-codegen:
 	hack/verify-codegen.sh
 .PHONY: verify-codegen
 
+#Define golangci-lint variables
+GOLANGCI_LINT = $(shell pwd)/_output/tools/bin/golangci-lint
+GOLANGCI_LINT_VERSION ?= v1.61.0
+golangci-lint:
+	@[ -f $(GOLANGCI_LINT) ] || { \
+	set -e ;\
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell dirname $(GOLANGCI_LINT)) $(GOLANGCI_LINT_VERSION) ;\
+	}
+
+.PHONY: lint
+lint: golangci-lint ## Run golangci-lint linter 
+	$(GOLANGCI_LINT) run --timeout 30m
+
+.PHONY: lint-fix
+lint-fix: golangci-lint ## Run golangci-lint linter and perform fixes
+	$(GOLANGCI_LINT) run --fix --timeout 30m
+
 verify-controller-manifests:
 	hack/verify-lws-controller-manifests.sh
 .PHONY: verify-controller-manifests
